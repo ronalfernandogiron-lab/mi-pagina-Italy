@@ -1,0 +1,127 @@
+import { useEffect, useState } from "react";
+import Hero from "./componentes/Hero";
+import Encabezado from "./componentes/Encabezado";
+import PieDePagina from "./componentes/Pie de página";
+import FormularioContacto from "./componentes/Formulario de contacto";
+import GaleriaFotos from "./componentes/Galería de fotos";
+import ListaMensajes from "./componentes/Lista de mensajes";
+import SeccionMensajes from "./componentes/Sección de mensajes";
+import ScrollToTop from "./componentes/ScrollToTop";
+
+export default function App() {
+  const [mensajes, setMensajes] = useState(() => {
+    const saved = localStorage.getItem("mensajes");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [hearts, setHearts] = useState([]);
+
+  useEffect(() => {
+    localStorage.setItem("mensajes", JSON.stringify(mensajes));
+  }, [mensajes]);
+
+  // Generar corazones flotantes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHearts((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          left: Math.random() * 100,
+        },
+      ]);
+
+      setTimeout(() => {
+        setHearts((prev) => prev.slice(1));
+      }, 4000);
+    }, 800);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div
+      className="min-h-screen text-white bg-cover bg-center bg-fixed overflow-hidden"
+      style={{
+        backgroundImage:
+          "url('https://wallpapers.com/images/featured/kuromi-aesthetic-pictures-3nq7l7v2x9.jpg')",
+      }}
+    >
+      {/* Corazones flotando */}
+      <div className="pointer-events-none fixed inset-0">
+        {hearts.map((heart) => (
+          <span
+            key={heart.id}
+            className="absolute text-pink-400 text-xl animate-float"
+            style={{ left: `${heart.left}%`, bottom: 0 }}
+          >
+            💜
+          </span>
+        ))}
+      </div>
+
+      <div className="min-h-screen bg-black/60 backdrop-blur-md">
+        <Encabezado />
+
+        <Hero />
+
+        <main className="max-w-5xl mx-auto px-4 space-y-16 py-10">
+          <section className="animate-fade-in">
+            <SeccionMensajes mensajes={mensajes} setMensajes={setMensajes} />
+            <ListaMensajes mensajes={mensajes} />
+          </section>
+
+          <section className="animate-fade-in">
+            <GaleriaFotos />
+          </section>
+
+          {/* Sección especial */}
+          <section className="flex justify-center animate-fade-in">
+            <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md text-center shadow-xl">
+              <h2 className="text-2xl font-bold mb-2">Para ti 💜</h2>
+              <p>
+                Esta página no es solo código... es cada pensamiento bonito que
+                tengo contigo.
+              </p>
+            </div>
+          </section>
+
+          <section className="animate-fade-in">
+            <FormularioContacto setMensajes={setMensajes} />
+          </section>
+        </main>
+
+        <PieDePagina />
+        <ScrollToTop />
+
+        {/* Música de fondo */}
+        <audio autoPlay loop>
+          <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mp3" />
+        </audio>
+      </div>
+
+      {/* Animaciones */}
+      <style>
+        {`
+          .animate-float {
+            animation: floatUp 4s linear forwards;
+          }
+
+          @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+          }
+
+          .animate-fade-in {
+            animation: fadeIn 1.5s ease-in-out;
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}
+      </style>
+    </div>
+  );
+}
